@@ -6,8 +6,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        TelaVeiculo tela = new TelaVeiculo();
+        new TelaVeiculo();
 
-        tela.iniciar();
     }
 }
