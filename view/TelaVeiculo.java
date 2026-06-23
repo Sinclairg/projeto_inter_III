@@ -33,6 +33,8 @@ public class TelaVeiculo extends JFrame {
     private JButton btnAtualizar;
     private JButton btnExcluir;
     private JButton btnListar;
+    private JButton btnUnicoDono;
+    private JButton btnTotal;
 
     private JTable tabela;
     private JScrollPane scrollPane;
@@ -123,6 +125,14 @@ public class TelaVeiculo extends JFrame {
         btnListar.setBounds(350, 180, 120, 30);
         add(btnListar);
 
+        btnUnicoDono = new JButton("Único Dono");
+        btnUnicoDono.setBounds(500, 180, 120, 30);
+        add(btnUnicoDono);
+
+        btnTotal = new JButton("Total");
+        btnTotal.setBounds(500, 220, 120, 30);
+        add(btnTotal);
+
         modeloTabela = new DefaultTableModel();
 
         modeloTabela.addColumn("ID");
@@ -140,102 +150,199 @@ public class TelaVeiculo extends JFrame {
         add(scrollPane);
 
         btnSalvar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+    @Override
+    public void actionPerformed(ActionEvent e) {
 
-                Veiculo veiculo = new Veiculo();
+        if (txtNome.getText().trim().isEmpty()
+                || txtCor.getText().trim().isEmpty()
+                || txtAno.getText().trim().isEmpty()
+                || txtModelo.getText().trim().isEmpty()
+                || txtChassi.getText().trim().isEmpty()
+                || txtPlaca.getText().trim().isEmpty()) {
 
-                veiculo.setNome(txtNome.getText());
-                veiculo.setCor(txtCor.getText());
-                veiculo.setAno(Integer.parseInt(txtAno.getText()));
-                veiculo.setModelo(Integer.parseInt(txtModelo.getText()));
-                veiculo.setnChassi(txtChassi.getText());
-                veiculo.setPlaca(txtPlaca.getText());
-                veiculo.setUnicoDono(chkUnicoDono.isSelected());
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Preencha todos os campos!"
+            );
 
-                dao.salvar(veiculo);
-                arquivo.salvarEmArquivo(veiculo);
+            return;
+        }
 
-                carregarTabela();
-                limparCampos();
-            }
-        });
+        try {
 
+            Integer.parseInt(txtAno.getText());
+            Integer.parseInt(txtModelo.getText());
+
+        } catch (NumberFormatException ex) {
+
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Ano e Modelo devem conter apenas números!"
+            );
+
+            return;
+        }
+
+        Veiculo existente =
+                dao.buscarPorPlaca(txtPlaca.getText());
+
+        if (existente != null) {
+
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Já existe um veículo com esta placa!"
+            );
+
+            return;
+        }
+
+        Veiculo veiculo = new Veiculo();
+
+        veiculo.setNome(txtNome.getText());
+        veiculo.setCor(txtCor.getText());
+        veiculo.setAno(Integer.parseInt(txtAno.getText()));
+        veiculo.setModelo(Integer.parseInt(txtModelo.getText()));
+        veiculo.setnChassi(txtChassi.getText());
+        veiculo.setPlaca(txtPlaca.getText());
+        veiculo.setUnicoDono(chkUnicoDono.isSelected());
+
+        dao.salvar(veiculo);
+
+        arquivo.salvarEmArquivo(veiculo);
+
+        JOptionPane.showMessageDialog(
+                null,
+                "Veículo cadastrado com sucesso!"
+        );
+
+        carregarTabela();
+        limparCampos();
+    }
+});
         btnBuscar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+    @Override
+    public void actionPerformed(ActionEvent e) {
 
-                Veiculo v = dao.buscarPorPlaca(txtPlaca.getText());
+        Veiculo v =
+                dao.buscarPorPlaca(txtPlaca.getText());
 
-                if (v != null) {
+        if (v != null) {
 
-                    idAtual = v.getId();
+            idAtual = v.getId();
 
-                    txtNome.setText(v.getNome());
-                    txtCor.setText(v.getCor());
-                    txtAno.setText(String.valueOf(v.getAno()));
-                    txtModelo.setText(String.valueOf(v.getModelo()));
-                    txtChassi.setText(v.getnChassi());
+            txtNome.setText(v.getNome());
+            txtCor.setText(v.getCor());
+            txtAno.setText(String.valueOf(v.getAno()));
+            txtModelo.setText(String.valueOf(v.getModelo()));
+            txtChassi.setText(v.getnChassi());
+            txtPlaca.setText(v.getPlaca());
 
-                    chkUnicoDono.setSelected(v.isUnicoDono());
+            chkUnicoDono.setSelected(
+                    v.isUnicoDono()
+            );
 
-                } else {
+        } else {
 
-                    System.out.println("Veículo não encontrado.");
-                }
-            }
-        });
-
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Veículo não encontrado!"
+            );
+        }
+    }
+});
         btnAtualizar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+    @Override
+    public void actionPerformed(ActionEvent e) {
 
-                if (idAtual == 0) {
+        if (idAtual == 0) {
 
-                    System.out.println("Busque um veículo primeiro.");
-                    return;
-                }
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Busque um veículo primeiro!"
+            );
 
-                Veiculo v = new Veiculo();
+            return;
+        }
 
-                v.setId(idAtual);
+        try {
 
-                v.setNome(txtNome.getText());
-                v.setCor(txtCor.getText());
-                v.setAno(Integer.parseInt(txtAno.getText()));
-                v.setModelo(Integer.parseInt(txtModelo.getText()));
-                v.setnChassi(txtChassi.getText());
-                v.setPlaca(txtPlaca.getText());
-                v.setUnicoDono(chkUnicoDono.isSelected());
+            Integer.parseInt(txtAno.getText());
+            Integer.parseInt(txtModelo.getText());
 
-                dao.atualizar(v);
+        } catch (NumberFormatException ex) {
 
-                carregarTabela();
-                limparCampos();
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Ano e Modelo devem conter apenas números!"
+            );
 
-                idAtual = 0;
-            }
-        });
+            return;
+        }
+
+        Veiculo v = new Veiculo();
+
+        v.setId(idAtual);
+
+        v.setNome(txtNome.getText());
+        v.setCor(txtCor.getText());
+        v.setAno(Integer.parseInt(txtAno.getText()));
+        v.setModelo(Integer.parseInt(txtModelo.getText()));
+        v.setnChassi(txtChassi.getText());
+        v.setPlaca(txtPlaca.getText());
+        v.setUnicoDono(chkUnicoDono.isSelected());
+
+        dao.atualizar(v);
+
+        JOptionPane.showMessageDialog(
+                null,
+                "Veículo atualizado com sucesso!"
+        );
+
+        carregarTabela();
+        limparCampos();
+
+        idAtual = 0;
+    }
+});
 
         btnExcluir.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+    @Override
+    public void actionPerformed(ActionEvent e) {
 
-                if (idAtual == 0) {
+        if (idAtual == 0) {
 
-                    System.out.println("Busque um veículo primeiro.");
-                    return;
-                }
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Busque um veículo primeiro!"
+            );
 
-                dao.excluir(idAtual);
+            return;
+        }
 
-                carregarTabela();
-                limparCampos();
+        int resposta =
+                JOptionPane.showConfirmDialog(
+                        null,
+                        "Deseja realmente excluir?",
+                        "Confirmação",
+                        JOptionPane.YES_NO_OPTION
+                );
 
-                idAtual = 0;
-            }
-        });
+        if (resposta == JOptionPane.YES_OPTION) {
 
+            dao.excluir(idAtual);
+
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Veículo excluído com sucesso!"
+            );
+
+            carregarTabela();
+            limparCampos();
+
+            idAtual = 0;
+        }
+    }
+});
         btnListar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -243,6 +350,44 @@ public class TelaVeiculo extends JFrame {
                 carregarTabela();
             }
         });
+
+            btnUnicoDono.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+    
+                    List<Veiculo> lista = dao.listarUnicoDono();
+    
+                    modeloTabela.setRowCount(0);
+    
+                    for (Veiculo v : lista) {
+    
+                        modeloTabela.addRow(new Object[]{
+                                v.getId(),
+                                v.getNome(),
+                                v.getCor(),
+                                v.getAno(),
+                                v.getModelo(),
+                                v.getPlaca()
+                        });
+                    }
+                }
+            });
+    
+            btnTotal.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+
+                    int total = dao.totalVeiculos();
+
+                    JOptionPane.showMessageDialog(
+                        null,
+                        "Total de veículos cadastrados: " + total
+        );
+    }
+});
+
+            carregarTabela();
 
         setVisible(true);
     }
